@@ -8,9 +8,14 @@
 import UIKit
 import CoreData
 
-class TaskDetailsViewController: UIViewController {
+protocol TaskUpdateDelegate: AnyObject {
+    func didUpdateTask()
+}
+
+class TaskDetailsViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDelegate {
     
-    @IBOutlet weak var taskTitleField: UILabel!
+    
+    @IBOutlet weak var taskTitleField: UITextField!
     
     @IBOutlet weak var taskDescriptionView: UITextView!
     
@@ -22,19 +27,34 @@ class TaskDetailsViewController: UIViewController {
     var categories = ["Work", "Personal", "Shopping", "Fitness", "Other"] // Example categories
     var selectedCategory: String?
     
+    weak var delegate: TaskUpdateDelegate?
     var managedContext: NSManagedObjectContext!
      var task: Items!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        categoryPicker.dataSource = self
+        categoryPicker.delegate = self
+
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         managedContext = appDelegate.persistentContainer.viewContext
-        
+                
         guard let task = task else {
                print("Task is nil")
                return
            }
+ 
+        let disableEditing = UserDefaults.standard.bool(forKey: "disableEditingEnabled")
+        
+        // Disable all UI elements except cancel button if editing is disabled
+        if disableEditing {
+            taskTitleField.isEnabled = false
+            taskDescriptionView.isEditable = false
+            dueDatePicker.isEnabled = false
+            prioritySegment.isEnabled = false
+            categoryPicker.isUserInteractionEnabled = false
+        }
         
         // Pre-fill fields with task data
         taskTitleField.text = task.title
@@ -67,7 +87,17 @@ class TaskDetailsViewController: UIViewController {
     }
     
     @IBAction func editChanges(_ sender: UIButton) {
-        task.title = taskTitleField.text
+        let disableEditing = UserDefaults.standard.bool(forKey: "disableEditingEnabled")
+         
+         if disableEditing {
+             let alert = UIAlertController(title: "Editing Disabled",
+                                           message: "Enable editing in Settings to make changes.",
+                                           preferredStyle: .alert)
+             alert.addAction(UIAlertAction(title: "OK", style: .default))
+             present(alert, animated: true)
+             return
+         }
+                task.title = taskTitleField.text
                 task.taskDescription = taskDescriptionView.text
                 task.dueDate = dueDatePicker.date
                 task.priority = Int16(prioritySegment.selectedSegmentIndex)
@@ -75,6 +105,7 @@ class TaskDetailsViewController: UIViewController {
                 
                 do {
                     try managedContext.save()
+                    delegate?.didUpdateTask()
                     navigationController?.popViewController(animated: true)
                 } catch {
                     print("Failed to update task: \(error)")
@@ -82,3 +113,4 @@ class TaskDetailsViewController: UIViewController {
             }
     
 }
+

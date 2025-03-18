@@ -55,5 +55,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
     
+    func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
+        if let navController = viewController as? UINavigationController {
+            navController.popToRootViewController(animated: false) // Reset to TaskListViewController when tab is selected
+        }
+    }
+    
 }
 

@@ -63,10 +63,11 @@ class TaskCreationViewController: UIViewController {
                do {
                    try context.save()
                    delegate?.didCreateTask(newTask)
-                   dismiss(animated: true)
-               } catch {
-                   print("Failed to save task: \(error)")
-               }
+                   
+                   dismiss(animated: true, completion: nil)
+                   } catch {
+                       print("Failed to save task: \(error)")
+                   }
            }
     
     @IBAction func cancelTask(_ sender: UIButton) {
