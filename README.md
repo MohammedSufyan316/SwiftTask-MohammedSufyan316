@@ -46,5 +46,5 @@ An iOS mobile app that allows users to manage daily tasks with support for custo
 ## 👤 Author
 
 Mohammed Sufyan Khan Osmani  
-iOS Mobile Development | SE 452 Final Project
+iOS Mobile Application Development | CSC 471 Final Project
 
